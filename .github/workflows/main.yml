@@ -32,32 +32,38 @@ jobs:
 
     - name: Check coverage
       run: |
-        if (( $(echo "${{ steps.coverage.outputs.coverage }}" "< 80" | bc -l) )); then
-          echo "❌ **Insufficient coverage. Current: ${{ steps.coverage.outputs.coverage }}%**"
-          exit 1
+        COVERAGE=${{ steps.coverage.outputs.coverage }}
+        if [ "$COVERAGE" -ge 80 ]; then
+          echo "✅ **Acceptable coverage: $COVERAGE%**"
+          STATUS="Yes"
+          EMOJI="✅"
         else
-          echo "✅ **Acceptable coverage: ${{ steps.coverage.outputs.coverage }}%**"
+          echo "❌ **Insufficient coverage. Current: $COVERAGE%**"
+          STATUS="No"
+          EMOJI="❌"
         fi
+        echo "::set-output name=status::$STATUS"
+        echo "::set-output name=emoji::$EMOJI"
 
     - name: Create or update coverage comment
       run: |
-        COMMENT_BODY="## Coverage Report\nThe test coverage for this pull request is: **${{ steps.coverage.outputs.coverage }}%**\n${{ steps.coverage.outputs.coverage >= 80 ? '✅' : '❌' }} *Coverage is above 80%: ${{ steps.coverage.outputs.coverage >= 80 ? 'Yes' : 'No' }}*"
+        COMMENT_BODY="## Coverage Report\nThe test coverage for this pull request is: **${{ steps.coverage.outputs.coverage }}%**\n${{ steps.status }} *Coverage is above 80%: ${{ steps.status }}*"
 
-        # Get existing comment ID if it exists
-        COMMENT_ID=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+        # Get existing comment IDs
+        COMMENT_IDS=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
                          -X GET \
                          "https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments" | \
                          jq -r '.[] | select(.user.login == "github-actions[bot]" and .body | contains("## Coverage Report")) | .id')
 
-        # If comment exists, update it; otherwise, create a new one
-        if [ -n "$COMMENT_ID" ]; then
+        # Delete existing comments
+        for COMMENT_ID in $COMMENT_IDS; do
           curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-               -X PATCH \
-               -d '{"body": "'"${COMMENT_BODY}"'"}' \
+               -X DELETE \
                "https://api.github.com/repos/${{ github.repository }}/issues/comments/$COMMENT_ID"
-        else
-          curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-               -X POST \
-               -d '{"body": "'"${COMMENT_BODY}"'"}' \
-               "https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments"
-        fi
+        done
+
+        # Create a new comment
+        curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+             -X POST \
+             -d '{"body": "'"${COMMENT_BODY}"'"}' \
+             "https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments"
