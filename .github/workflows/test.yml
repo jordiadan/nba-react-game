@@ -1,0 +1,45 @@
+name: Test and Coverage
+
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+
+jobs:
+  test_and_coverage:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Install dependencies
+      run: npm install
+
+    - name: Run tests and calculate coverage
+      run: npm test -- --coverage
+
+    - name: Get coverage percentage
+      id: coverage
+      run: echo "::set-output name=coverage::$(awk -F"'\": " '/lines/ {print $2}' coverage/lcov-report/index.html | sed 's/\%//')"
+
+    - name: Check coverage
+      run: |
+        if (( $(echo "${{ steps.coverage.outputs.coverage }}" "< 80" | bc -l) )); then
+          echo "❌ **Insufficient coverage. Current: ${{ steps.coverage.outputs.coverage }}%**"
+          exit 1
+        else
+          echo "✅ **Acceptable coverage: ${{ steps.coverage.outputs.coverage }}%**"
+        fi
+
+    - name: Create or update coverage comment
+      uses: mikeal/create-or-update-comment@v2
+      with:
+        issue-number: ${{ github.event.pull_request.number }}
+        body: |
+          ## Coverage Report
+          The test coverage for this pull request is: **${{ steps.coverage.outputs.coverage }}%**
+          ${{ steps.coverage.outputs.coverage >= 80 ? '✅' : '❌' }} *Coverage is above 80%: ${{ steps.coverage.outputs.coverage >= 80 ? 'Yes' : 'No' }}*
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
