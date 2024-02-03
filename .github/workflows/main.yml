@@ -48,7 +48,6 @@ jobs:
           path: coverage
 
       - name: Check coverage
-        uses: zxh19890117/coverage-action@v2
-        with:
-          path: coverage
-          minimum: 80
+        run: |
+          npx nyc report --reporter=text-summary
+          npx nyc check-coverage --lines 80
