@@ -11,22 +11,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout código
-      uses: actions/checkout@v2
-
     - name: Crear comentario
-      run: echo "Hello world" > hello-world-comment.txt
-
-    - name: Subir comentario
-      uses: actions/github-script@latest
-      with:
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-        script: |
-          const fs = require('fs');
-          const comment = fs.readFileSync('hello-world-comment.txt', 'utf-8');
-          github.issues.createComment({
-            issue_number: context.issue.number,
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            body: comment
-          });
+      run: |
+        COMMENT="Hello world"
+        API_URL="https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments"
+        curl -X POST -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" -d "{\"body\":\"$COMMENT\"}" $API_URL
