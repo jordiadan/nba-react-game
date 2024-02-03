@@ -19,6 +19,9 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Install nyc
+        run: npm install --save-dev nyc@15.1.0
+
       - name: Run tests and coverage
         run: npm test -- --coverage
 
@@ -51,7 +54,7 @@ jobs:
 
       - name: Check coverage and report to pull request
         run: |
-          COVERAGE_PERCENT=$(npx nyc report --reporter=text-summary | grep -oP 'All files\s*\K\d+%')
+          COVERAGE_PERCENT=$(npx nyc report --reporter=text-summary | awk '/All files/ { print $NF }')
 
           if [ "$COVERAGE_PERCENT" -ge 80 ]; then
             COMMENT="✅ Code coverage is at $COVERAGE_PERCENT%. Great job!"
@@ -61,4 +64,4 @@ jobs:
 
           echo "Commenting on PR"
           echo "$COMMENT"
-          curl -s -X POST -H "Authorization: Bearer $GITHUB_TOKEN" -H "Accept: application/vnd.github.v3+json" -d "{\"body\":\"$COMMENT\"}" "https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.number }}/comments"
+          curl -s -X POST -H "Authorization: ${{ secrets.GITHUB_TOKEN }}" -H "Accept: application/vnd.github.v3+json" -d "{\"body\":\"$COMMENT\"}" "https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.number }}/comments"
