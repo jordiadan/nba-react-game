@@ -34,21 +34,15 @@ jobs:
       run: |
         COVERAGE=${{ steps.coverage.outputs.coverage }}
         if [ "$COVERAGE" -ge 80 ]; then
-          echo "✅ **Acceptable coverage: $COVERAGE%**"
-          STATUS="Yes"
-          EMOJI="✅"
+          echo -e "::set-output name=status::Yes\n::set-output name=emoji:::white_check_mark:"
         else
-          echo "❌ **Insufficient coverage. Current: $COVERAGE%**"
-          STATUS="No"
-          EMOJI="❌"
+          echo -e "::set-output name=status::No\n::set-output name=emoji:::x:"
         fi
-        echo "::set-output name=status::$STATUS"
-        echo "::set-output name=emoji::$EMOJI"
 
     - name: Create or update coverage comment
       run: |
-        COMMENT="## Coverage Report\n\nThe test coverage for this pull request is: **${{ steps.coverage.outputs.coverage }}%**\n\n${{ steps.status }} *Coverage is above 80%: ${{ steps.status }}*"
+        COMMENT="## Coverage Report\n\nThe test coverage for this pull request is: **${{ steps.coverage.outputs.coverage }}%**\n\n<details><summary>Details</summary>\n\n- **Status:** ${{ steps.status }}\n\n</details>\n\n$([[ steps.status == 'Yes' ]] && echo ':::white_check_mark:' || echo ':::x:') *Coverage is above 80%: ${{ steps.status }}*"
         API_URL="https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments"
 
         # Create a new comment
-        curl -X POST -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" -d "{\"body\":\"$COMMENT\"}" $API_URL
+        curl -X POST -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" -d "{\"body\":\"$COMMENT\", \"in_reply_to\":\"${{ github.event.comment.id }}\"}" $API_URL
