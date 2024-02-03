@@ -27,7 +27,7 @@ jobs:
     - name: Get coverage percentage
       id: coverage
       run: |
-        COVERAGE=$(grep -oP '(?<=<span class="pc_cov">)[^<]+' coverage/lcov-report/index.html)
+        COVERAGE=$(sed -n 's/.*<span class="pc_cov">\([^<]*\)<\/span><span class="pc_vis">.*/\1/p' coverage/lcov-report/index.html)
         echo "::set-output name=coverage::$COVERAGE"
 
     - name: Check coverage
