@@ -1,4 +1,4 @@
-name: Run Tests and Extract Coverage
+name: Run Tests and Check Coverage
 
 on:
   pull_request:
@@ -7,11 +7,8 @@ on:
       - synchronize
 
 jobs:
-  run_tests_and_extract_coverage:
+  run_tests_and_check_coverage:
     runs-on: ubuntu-latest
-
-    outputs:
-      total_coverage: ${{ steps.extract_coverage.outputs.total_coverage }}
 
     steps:
     - name: Checkout code
@@ -23,28 +20,19 @@ jobs:
     - name: Run tests with coverage
       run: npm test -- --coverage
 
-    - name: Extract and print coverage
-      id: extract_coverage
+    - name: Check coverage threshold
       run: |
         # Run tests with coverage and capture the output
         coverage_output=$(npm test -- --coverage 2>&1)
 
-        # Extract the line containing the total coverage percentage
+        # Get the total coverage line
         total_coverage_line=$(echo "$coverage_output" | awk '/All files/ {print $4}' | tr -d '%')
 
-        # Print the total coverage percentage
+        # Print the total coverage
         echo "Total Coverage: $total_coverage_line"
 
-        # Set the total coverage percentage as an output
-        echo "::set-output name=total_coverage::$total_coverage_line"
-
-    - name: Check coverage threshold
-      run: |
-        # Get the total coverage from the previous step
-        total_coverage=${{ needs.run_tests_and_extract_coverage.outputs.total_coverage }}
-
         # Check if coverage is below 80%
-        if (( $(echo "$total_coverage < 80" | bc -l) )); then
+        if (( $(echo "$total_coverage_line < 80" | bc -l) )); then
           echo "Coverage is below 80%. Failing the check."
           exit 1
         else
