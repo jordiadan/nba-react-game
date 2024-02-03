@@ -11,12 +11,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-
-      - name: Comment on PR
+      - name: Add comment
         run: |
-          COMMENT="Hello! This is a comment from the GitHub Actions workflow."
-          echo "Commenting on PR"
-          echo "$COMMENT"
-          curl -s -X POST -H "Authorization: ${{ secrets.GITHUB_TOKEN }}" -H "Accept: application/vnd.github.v3+json" -d "{\"body\":\"$COMMENT\"}" "https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.number }}/comments"
+          gh issue comment "$NUMBER" --body "$BODY"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NUMBER: ${{ github.event.issue.number }}
+          BODY: >
+            This issue is available for anyone to work on.
+            **Make sure to reference this issue in your pull request.**
+            :sparkles: Thank you for your contribution! :sparkles:
