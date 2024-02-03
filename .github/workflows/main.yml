@@ -30,34 +30,34 @@ jobs:
           name: coverage
           path: coverage/lcov-report
 
-check-coverage:
-  runs-on: ubuntu-latest
+  check-coverage:
+    runs-on: ubuntu-latest
 
-  needs: test
+    needs: test
 
-  steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
 
-    - name: Set up Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: 14
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 14
 
-    - name: Install dependencies
-      run: npm install
+      - name: Install dependencies
+        run: npm install
 
-    - name: Download coverage results
-      uses: actions/download-artifact@v2
-      with:
-        name: coverage
-        path: coverage
+      - name: Download coverage results
+        uses: actions/download-artifact@v2
+        with:
+          name: coverage
+          path: coverage
 
-    - name: Check coverage and report to pull request
-      run: |
-        COVERAGE_PERCENT=$(npx nyc check-coverage --lines 80 --reporter=lcov --nycrc-path .nycrc.json | grep 'Statements' | awk '{print $4}' | sed 's/\%//')
-        COMMENT="Current test coverage is at $COVERAGE_PERCENT%. Minimum required coverage is 80%."
+      - name: Check coverage and report to pull request
+        run: |
+          COVERAGE_PERCENT=$(npx nyc check-coverage --lines 80 --reporter=lcov --nycrc-path .nycrc.json | grep 'Statements' | awk '{print $4}' | sed 's/\%//')
+          COMMENT="Current test coverage is at $COVERAGE_PERCENT%. Minimum required coverage is 80%."
 
-        echo "Commenting on PR"
-        echo "$COMMENT"
-        curl -s -X POST -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" -H "Accept: application/vnd.github.v3+json" -d "{\"body\":\"$COMMENT\"}" "https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.number }}/comments"
+          echo "Commenting on PR"
+          echo "$COMMENT"
+          curl -s -X POST -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" -H "Accept: application/vnd.github.v3+json" -d "{\"body\":\"$COMMENT\"}" "https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.number }}/comments"
