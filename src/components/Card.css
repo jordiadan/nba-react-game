@@ -1,0 +1,67 @@
+/* Card.css */
+
+.card {
+    position: relative;
+    border-radius: 16px;
+    width: 180px; /* Adjust the width as needed */
+    height: 300px; /* Adjust the height as needed */
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+    text-align: center;
+    padding: 20px; /* Adjust the padding as needed */
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    overflow: hidden;
+    background: linear-gradient(to bottom, #3498db, #2980b9); /* Vibrant gradient background */
+  }
+  
+  .card img {
+    width: 100%; /* Adjust the width of the sample image */
+    border-radius: 16px;
+    margin: 0 auto;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1;
+  }
+  
+  .card-title {
+    font-size: 20px;
+    font-weight: bold;
+    margin: 16px 0;
+    color: #fff; /* Text color for better visibility against the overlay */
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.4); /* Text shadow for emphasis */
+  }
+  
+  .card-stats {
+    font-size: 16px;
+    color: #fff; /* Adjust the text color as needed */
+    margin-top: 12px;
+  }
+  
+  .avg-power-overlay {
+    position: absolute;
+    top: 16px;
+    left: 16px;
+    z-index: 2;
+    padding: 8px;
+    border-radius: 12px;
+    font-weight: bold;
+    color: #fff; /* Text color for better visibility against the overlay */
+    background: #e74c3c; /* Vibrant background color for the overlay */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  }
+  
+  /* Add styles for different rarities */
+  .epic {
+    background: linear-gradient(to bottom, #9b59b6, #3498db);
+  }
+  
+  .legendary {
+    background: linear-gradient(to bottom, #e67e22, #f39c12);
+  }
+  
+  .rare {
+    background: linear-gradient(to bottom, #2ecc71, #27ae60);
+  }
+  
