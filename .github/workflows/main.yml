@@ -28,7 +28,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: coverage
-          path: coverage/lcov-report
+          path: coverage
 
   check-coverage:
     runs-on: ubuntu-latest
@@ -55,8 +55,8 @@ jobs:
 
       - name: Check coverage and report to pull request
         run: |
-          COVERAGE_PERCENT=$(cat coverage/lcov-report/index.html | grep -oP 'data-percentage="\K[^"]+')
-          COMMENT="Current test coverage is at $COVERAGE_PERCENT%. Minimum required coverage is 80%."
+          COVERAGE_PERCENT=$(cat coverage/lcov-report/lcov-report.txt | grep -oP 'Statements.*\K\d+%')
+          COMMENT="Current test coverage is at $COVERAGE_PERCENT. Minimum required coverage is 80%."
 
           echo "Commenting on PR"
           echo "$COMMENT"
