@@ -27,9 +27,5 @@ jobs:
     - name: Get coverage percentage
       id: coverage
       run: |
-        COVERAGE=$(sed -n 's/.*<span class="pc_cov">\([^<]*\)<\/span><span class="pc_vis">.*/\1/p' coverage/lcov-report/index.html)
+        COVERAGE=$(cat coverage/lcov-report/index.html | grep -oP 'data-stat="[0-9]+" data-value="\K[^"]+')
         echo "Test coverage is: $COVERAGE%"
-
-    - name: Print coverage to console
-      run: |
-        echo "Test coverage is: ${{ steps.coverage.outputs.coverage }}%"
