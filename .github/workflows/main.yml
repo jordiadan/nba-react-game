@@ -15,14 +15,20 @@ jobs:
       uses: actions/checkout@v2
 
     - name: Install dependencies
-      run: npm install
+      run: |
+        npm install
+        npm list
 
     - name: Run tests and calculate coverage
-      run: npm test -- --coverage
+      run: |
+        npm test -- --coverage
+        ls -l coverage
 
     - name: Get coverage percentage
       id: coverage
-      run: echo "::set-output name=coverage::$(awk -F"'\": " '/lines/ {print $2}' coverage/lcov-report/index.html | sed 's/\%//')"
+      run: |
+        COVERAGE=$(grep -oP '(?<=<span class="pc_cov">)[^<]+' coverage/lcov-report/index.html)
+        echo "::set-output name=coverage::$COVERAGE"
 
     - name: Check coverage
       run: |
@@ -34,12 +40,24 @@ jobs:
         fi
 
     - name: Create or update coverage comment
-      uses: mikeal/create-or-update-comment@v2
-      with:
-        issue-number: ${{ github.event.pull_request.number }}
-        body: |
-          ## Coverage Report
-          The test coverage for this pull request is: **${{ steps.coverage.outputs.coverage }}%**
-          ${{ steps.coverage.outputs.coverage >= 80 ? '✅' : '❌' }} *Coverage is above 80%: ${{ steps.coverage.outputs.coverage >= 80 ? 'Yes' : 'No' }}*
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        COMMENT_BODY="## Coverage Report\nThe test coverage for this pull request is: **${{ steps.coverage.outputs.coverage }}%**\n${{ steps.coverage.outputs.coverage >= 80 ? '✅' : '❌' }} *Coverage is above 80%: ${{ steps.coverage.outputs.coverage >= 80 ? 'Yes' : 'No' }}*"
+
+        # Get existing comment ID if it exists
+        COMMENT_ID=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+                         -X GET \
+                         "https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments" | \
+                         jq -r '.[] | select(.user.login == "github-actions[bot]" and .body | contains("## Coverage Report")) | .id')
+
+        # If comment exists, update it; otherwise, create a new one
+        if [ -n "$COMMENT_ID" ]; then
+          curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+               -X PATCH \
+               -d '{"body": "'"${COMMENT_BODY}"'"}' \
+               "https://api.github.com/repos/${{ github.repository }}/issues/comments/$COMMENT_ID"
+        else
+          curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+               -X POST \
+               -d '{"body": "'"${COMMENT_BODY}"'"}' \
+               "https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments"
+        fi
