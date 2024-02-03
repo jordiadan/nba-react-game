@@ -1,0 +1,38 @@
+name: Run Tests and Extract Coverage
+
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+
+jobs:
+  run_tests_and_extract_coverage:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Install dependencies
+      run: npm install
+
+    - name: Run tests with coverage
+      run: npm test -- --coverage
+
+    - name: Extract and print coverage
+      run: |
+        # Run tests with coverage and capture the output
+        coverage_output=$(npm test -- --coverage 2>&1)
+
+        # Extract the line containing the total coverage percentage
+        total_coverage_line=$(echo "$coverage_output" | awk '/All files/ {print $4}' | tr -d '%')
+
+        # Print the total coverage percentage
+        echo "Total Coverage: $total_coverage_line%"
+
+        # Set the total coverage percentage as an output for later use
+        echo "::set-output name=total_coverage::$total_coverage_line"
+
+    - name: Print coverage output
+      run: echo "Coverage Output: ${{ steps.run_tests_and_extract_coverage.outputs.total_coverage }}"
