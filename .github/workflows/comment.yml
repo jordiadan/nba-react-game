@@ -1,0 +1,22 @@
+name: Comment on PR
+
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+
+jobs:
+  comment-on-pr:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Comment on PR
+        run: |
+          COMMENT="Hello! This is a comment from the GitHub Actions workflow."
+          echo "Commenting on PR"
+          echo "$COMMENT"
+          curl -s -X POST -H "Authorization: ${{ secrets.GITHUB_TOKEN }}" -H "Accept: application/vnd.github.v3+json" -d "{\"body\":\"$COMMENT\"}" "https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.number }}/comments"
