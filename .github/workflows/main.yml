@@ -24,6 +24,12 @@ jobs:
       - name: Run tests and coverage
         run: npm test -- --coverage
 
+      - name: Upload coverage results
+        uses: actions/upload-artifact@v2
+        with:
+          name: coverage
+          path: coverage/lcov-report
+
   check-coverage:
     runs-on: ubuntu-latest
 
@@ -49,7 +55,6 @@ jobs:
 
       - name: Check coverage and report to pull request
         run: |
-          npx nyc report --reporter=lcov
           COVERAGE_PERCENT=$(npx nyc check-coverage --lines 80 --reporter=lcov | grep 'Statements' | awk '{print $4}' | sed 's/\%//')
           COMMENT="Current test coverage is at $COVERAGE_PERCENT%. Minimum required coverage is 80%."
 
