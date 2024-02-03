@@ -55,7 +55,7 @@ jobs:
 
       - name: Check coverage and report to pull request
         run: |
-          COVERAGE_PERCENT=$(npx nyc check-coverage --lines 80 --reporter=lcov --nycrc-path ./path/to/your/.nycrc.json | grep 'Statements' | awk '{print $4}' | sed 's/\%//')
+          COVERAGE_PERCENT=$(cat coverage/lcov-report/index.html | grep -oP 'data-percentage="\K[^"]+')
           COMMENT="Current test coverage is at $COVERAGE_PERCENT%. Minimum required coverage is 80%."
 
           echo "Commenting on PR"
