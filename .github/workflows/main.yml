@@ -24,6 +24,12 @@ jobs:
       - name: Run tests and coverage
         run: npm test -- --coverage
 
+      - name: Upload coverage results
+        uses: actions/upload-artifact@v2
+        with:
+          name: coverage
+          path: coverage
+
   check-coverage:
     runs-on: ubuntu-latest
 
@@ -47,7 +53,7 @@ jobs:
           name: coverage
           path: coverage
 
-      - name: Check coverage
+      - name: Check coverage and report to pull request
         run: |
-          npx nyc report --reporter=text-summary
-          npx nyc check-coverage --lines 80
+          npm install -g codecov
+          npx codecov -f coverage/coverage-final.json -F pr/${{ github.event.number }}
