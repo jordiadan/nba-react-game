@@ -17,10 +17,9 @@ jobs:
         uses: actions/setup-node@v2
 
       - name: Install dependencies
-        run: npm install
-
-      - name: Install nyc
-        run: npm install --save-dev nyc@15.1.0
+        run: |
+          npm install
+          npm install --save-dev nyc@15.1.0
 
       - name: Run tests and coverage
         run: npm test -- --coverage
@@ -54,9 +53,9 @@ jobs:
 
       - name: Check coverage and report to pull request
         run: |
-          COVERAGE_PERCENT=$(npx nyc report --reporter=text-summary | awk '/All files/ { print $NF }')
+          COVERAGE_PERCENT=$(npx nyc report --reporter=text-summary | awk '/All files/ { gsub(/[^0-9]/, "", $NF); print $NF }')
 
-          if [ "$COVERAGE_PERCENT" -ge 80 ]; then
+          if [ -n "$COVERAGE_PERCENT" ] && [ "$COVERAGE_PERCENT" -ge 80 ]; then
             COMMENT="✅ Code coverage is at $COVERAGE_PERCENT%. Great job!"
           else
             COMMENT="❌ Code coverage is below the required threshold. Current coverage is $COVERAGE_PERCENT%, minimum required is 80%."
