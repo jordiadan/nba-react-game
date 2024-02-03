@@ -24,12 +24,6 @@ jobs:
       - name: Run tests and coverage
         run: npm test -- --coverage
 
-      - name: Upload coverage results
-        uses: actions/upload-artifact@v2
-        with:
-          name: coverage
-          path: coverage
-
   check-coverage:
     runs-on: ubuntu-latest
 
@@ -55,5 +49,10 @@ jobs:
 
       - name: Check coverage and report to pull request
         run: |
-          npm install -g codecov
-          npx codecov -f coverage/coverage-final.json -F pr/${{ github.event.number }}
+          npx nyc report --reporter=lcov
+          COVERAGE_PERCENT=$(npx nyc check-coverage --lines 80 --reporter=lcov | grep 'Statements' | awk '{print $4}' | sed 's/\%//')
+          COMMENT="Current test coverage is at $COVERAGE_PERCENT%. Minimum required coverage is 80%."
+
+          echo "Commenting on PR"
+          echo "$COMMENT"
+          curl -s -X POST -H "Authorization: Bearer $GITHUB_TOKEN" -H "Accept: application/vnd.github.v3+json" -d "{\"body\":\"$COMMENT\"}" "https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.number }}/comments"
