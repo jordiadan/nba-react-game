@@ -1,4 +1,4 @@
-name: Comment on PR
+name: Hello World Comment
 
 on:
   pull_request:
@@ -7,24 +7,26 @@ on:
       - synchronize
 
 jobs:
-  comment-on-pr:
+  hello_world_comment:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
+    - name: Checkout código
+      uses: actions/checkout@v2
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v2
+    - name: Crear comentario
+      run: echo "Hello world" > hello-world-comment.txt
 
-      - name: Install GitHub CLI
-        run: |
-          sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-key C99B11DEB97541F0
-          sudo apt-add-repository -y "deb https://cli.github.com/packages $(lsb_release -cs) main"
-          sudo apt-get update
-          sudo apt-get install gh
-
-      - name: Add a comment to the PR
-        run: |
-          gh auth login --with-token "${{ secrets.GITHUB_TOKEN }}"
-          gh pr comment ${{ github.event.number }} --body "Hello! This is a comment on the pull request."
+    - name: Subir comentario
+      uses: actions/github-script@0.10.0
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        script: |
+          const fs = require('fs');
+          const comment = fs.readFileSync('hello-world-comment.txt', 'utf-8');
+          github.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: comment
+          });
