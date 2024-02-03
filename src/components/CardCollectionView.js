@@ -1,17 +1,19 @@
-// CardCollectionView.js
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import fetchCardData from '../api/CardsApi';
+import Card from './Card';
+import './CardCollectionView.css';
 
 const CardCollectionView = () => {
-  // Dummy data for illustration purposes
-  const cardData = [
-    { id: 1, playerName: 'Player 1', team: 'Team A', rarity: 'Common' },
-    { id: 2, playerName: 'Player 2', team: 'Team B', rarity: 'Rare' },
-    // Add more card data as needed
-  ];
-
+  const [cardData, setCardData] = useState([]);
   const [playerNameFilter, setPlayerNameFilter] = useState('');
   const [rarityFilter, setRarityFilter] = useState('All');
   const [teamFilter, setTeamFilter] = useState('All');
+
+  useEffect(() => {
+    fetchCardData().then((data) => {
+      setCardData(data);
+    });
+  }, []);
 
   const filteredCards = cardData.filter((card) =>
     card.playerName.toLowerCase().includes(playerNameFilter.toLowerCase()) &&
@@ -19,7 +21,6 @@ const CardCollectionView = () => {
     (teamFilter === 'All' || card.team === teamFilter)
   );
 
-  // Get unique rarities and teams for dropdown options
   const uniqueRarities = [...new Set(cardData.map((card) => card.rarity))];
   const uniqueTeams = [...new Set(cardData.map((card) => card.team))];
 
@@ -30,20 +31,17 @@ const CardCollectionView = () => {
       </header>
       <main>
         <section className="filters">
-          <div>
-            <label htmlFor="playerNameFilter">Filter by Player Name:</label>
+          <label>
+            Player Name:
             <input
               type="text"
-              id="playerNameFilter"
               value={playerNameFilter}
               onChange={(e) => setPlayerNameFilter(e.target.value)}
             />
-          </div>
-
-          <div>
-            <label htmlFor="rarityFilter">Filter by Rarity:</label>
+          </label>
+          <label>
+            Rarity:
             <select
-              id="rarityFilter"
               value={rarityFilter}
               onChange={(e) => setRarityFilter(e.target.value)}
             >
@@ -54,12 +52,10 @@ const CardCollectionView = () => {
                 </option>
               ))}
             </select>
-          </div>
-
-          <div>
-            <label htmlFor="teamFilter">Filter by Team:</label>
+          </label>
+          <label>
+            Team:
             <select
-              id="teamFilter"
               value={teamFilter}
               onChange={(e) => setTeamFilter(e.target.value)}
             >
@@ -70,28 +66,16 @@ const CardCollectionView = () => {
                 </option>
               ))}
             </select>
-          </div>
-        </section>
-
-        <section className="sorting-options">
-          <h3>Sorting Options</h3>
-          {/* Add sorting option components (e.g., dropdowns, buttons) */}
+          </label>
         </section>
 
         <section className="card-list">
           <h3>All Cards</h3>
-          <ul>
+          <div className="card-grid">
             {filteredCards.map((card) => (
-              <li key={card.id}>
-                <div>
-                  <p>{`Player: ${card.playerName}`}</p>
-                  <p>{`Team: ${card.team}`}</p>
-                  <p>{`Rarity: ${card.rarity}`}</p>
-                  {/* Add more card details as needed */}
-                </div>
-              </li>
+              <Card key={card.id} player={card} />
             ))}
-          </ul>
+          </div>
         </section>
       </main>
     </div>
