@@ -12,6 +12,8 @@ const CardCollectionView = () => {
   useEffect(() => {
     fetchCardData().then((data) => {
       setCardData(data);
+    }).catch((error) => {
+      console.error("Error fetching card data:", error);
     });
   }, []);
 
