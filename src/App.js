@@ -1,8 +1,8 @@
 // App.js
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import HomeView from './components/HomeView';
-import CardCollectionView from './components/CardCollectionView'; // Import the new component
+import HomeView from './components/Home/HomeView';
+import CardCollectionView from './components/CardCollection/CardCollectionView'; // Import the new component
 
 const App = () => {
   return (

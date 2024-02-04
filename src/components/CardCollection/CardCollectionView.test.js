@@ -1,10 +1,10 @@
 import React from 'react';
 import { render, screen, fireEvent, act } from '@testing-library/react';
-import CardCollectionView from './CardCollectionView';
-import fetchCardData from '../api/CardsApi';
+import CardCollectionView from '../CardCollection/CardCollectionView';
+import fetchCardData from '../../api/CardsApi';
 
 // Mock the module
-jest.mock('../api/CardsApi');
+jest.mock('../../api/CardsApi');
 
 describe('CardCollectionView component', () => {
   const mockData = [
