@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, act } from '@testing-library/react';
+import { render, screen, fireEvent, act } from '@testing-library/react';
 import CardCollectionView from './CardCollectionView';
 import fetchCardData from '../api/CardsApi';
 
@@ -7,30 +7,47 @@ import fetchCardData from '../api/CardsApi';
 jest.mock('../api/CardsApi');
 
 describe('CardCollectionView component', () => {
-  test('renders card collection', async () => {
-    // Create a promise that resolves with the mock data
-    const mockData = [
-      {
-        id: 1,
-        playerName: 'Mock Player',
-        team: 'Mock Team',
-        rarity: 'Mock Rarity',
-        image: 'mock_image.jpg',
-        avgPower: 88,
-        stats: { points: 20, rebounds: 8, assists: 4, steals: 1 },
-      },
-      // Add more mock data as needed
-    ];
+  const mockData = [
+    {
+      id: 1,
+      playerName: 'LeBron James',
+      team: 'Los Angeles Lakers',
+      rarity: 'Epic',
+      image: 'lebron_james.jpg',
+      avgPower: 95,
+      stats: { points: 30, rebounds: 10, assists: 8, steals: 2 },
+    },
+  ];
 
+  beforeEach(() => {
+    // Reset the mock implementation before each test
     fetchCardData.mockResolvedValueOnce(mockData);
+  });
 
+  test('renders card collection with default filters', async () => {
     await act(async () => {
       render(<CardCollectionView />);
     });
 
-    // Your assertions and test logic here
     expect(screen.getByText('Card Collection')).toBeInTheDocument();
     expect(screen.getByText('All Cards')).toBeInTheDocument();
+    expect(screen.getByText('LeBron James')).toBeInTheDocument();
     // Add more assertions as needed
   });
+
+  test('applies filters and renders filtered cards', async () => {
+    await act(async () => {
+      render(<CardCollectionView />);
+    });
+
+    // Apply filters
+    fireEvent.change(screen.getByLabelText('Player Name:'), { target: { value: 'LeBron' } });
+    fireEvent.change(screen.getByLabelText('Rarity:'), { target: { value: 'Epic' } });
+    fireEvent.change(screen.getByLabelText('Team:'), { target: { value: 'Los Angeles Lakers' } });
+
+    expect(screen.getByText('LeBron James')).toBeInTheDocument();
+    // Ensure other cards are not rendered
+    expect(screen.queryByText('Stephen Curry')).toBeNull();
+  });
+
 });
