@@ -1,0 +1,18 @@
+/* CardCollectionView.css */
+
+.card-collection-container {
+    /* Add any global styling for the container here */
+  }
+  
+  .filters {
+    /* Add styling for the filters section here */
+  }
+  
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+  }
+  
+  /* Add any additional styling for other sections as needed */
+  
