@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import fetchCardData from '../api/CardsApi';
-import Card from './Card';
+import fetchCardData from '../../api/CardsApi';
+import Card from '../Card/Card';
 import './CardCollectionView.css';
 
 const CardCollectionView = () => {
